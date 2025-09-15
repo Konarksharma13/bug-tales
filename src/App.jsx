@@ -69,7 +69,18 @@ export default function App() {
 
       if (!res.ok) throw new Error(`Backend error: ${res.status}`);
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json(); 
+      } catch {
+        const text = await res.text(); 
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error("Invalid backend response");
+        }
+      }
+
       setStory(data.story || "No story generated.");
       setSolution(data.solution || "");
     } catch (err) {
@@ -158,7 +169,7 @@ export default function App() {
               ) : (
                 <p className="text-gray-400">
                   Click to upload or drag & drop <br />
-                  <span className="text-sm">PNG, JPG up to 10MB</span>
+                  <span className="text-sm">PNG, JPG</span>
                 </p>
               )}
             </label>
@@ -173,7 +184,7 @@ export default function App() {
               >
                 {loading ? (
                   <>
-                    <i className="ri-timer-fill animate-spin"></i> Brewing Tales
+                    <i className="ri-hourglass-fill animate-spin"></i> Brewing Tales
                   </>
                 ) : (
                   <>
