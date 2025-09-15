@@ -3,7 +3,6 @@ import ReactMarkdown from "react-markdown";
 import gsap from "gsap";
 import toast, { Toaster } from "react-hot-toast";
 
-// Replace with your backend URL
 const BACKEND_URL =
   "https://error-storyteller-89872365527.us-central1.run.app/upload";
 
@@ -11,6 +10,7 @@ export default function App() {
   const [file, setFile] = useState(null);
   const [story, setStory] = useState("");
   const [solution, setSolution] = useState("");
+  const [persona, setPersona] = useState("Default Narrator");
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [launched, setLaunched] = useState(false);
@@ -60,6 +60,7 @@ export default function App() {
     try {
       const formData = new FormData();
       formData.append("screenshot", file);
+      formData.append("persona", persona);
 
       const res = await fetch(BACKEND_URL, {
         method: "POST",
@@ -73,7 +74,7 @@ export default function App() {
       setSolution(data.solution || "");
     } catch (err) {
       console.error(err);
-      toast.error("🚨 Cosmic turbulence! Try again in a moment.");
+      toast.error("Cosmic turbulence! Try again in a moment.");
     } finally {
       setLoading(false);
     }
@@ -82,7 +83,7 @@ export default function App() {
   const handleCopySolution = () => {
     if (solution) {
       navigator.clipboard.writeText(solution);
-      toast.success("✅ Solution copied to clipboard!");
+      toast.success("Solution copied to clipboard!");
     }
   };
 
@@ -95,20 +96,37 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col justify-between relative overflow-hidden">
-      {/* background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.15),transparent_60%),radial-gradient(circle_at_bottom_right,rgba(167,139,250,0.15),transparent_60%)]"></div>
 
-      {/* Toast provider */}
       <Toaster position="top-right" reverseOrder={false} />
 
       <main className="flex-grow flex justify-center items-center p-4">
-        <div className="w-full max-w-xl bg-gray-900/50 backdrop-blur-md border border-cyan-500/30 rounded-2xl p-8 shadow-lg shadow-cyan-400/10 relative">
+        <div className="w-full max-w-2xl bg-gray-900/50 backdrop-blur-md border border-cyan-500/30 rounded-2xl p-8 shadow-lg shadow-cyan-400/10 relative">
           <h1 className="text-center text-4xl font-extrabold mb-6 text-cyan-400 drop-shadow-lg flex items-center justify-center gap-2">
             <i className="ri-bug-fill text-violet-400 animate-pulse"></i> Bug
             Tales
           </h1>
 
-          {/* Upload area */}
+          <div className="flex flex-col items-center gap-3 mb-6">
+            <label className="font-semibold text-gray-300">
+              Choose Your Storyteller:
+            </label>
+            <select
+              value={persona}
+              onChange={(e) => setPersona(e.target.value)}
+              disabled={launched}
+              className="px-4 py-2 rounded-lg bg-gray-800 text-white border border-cyan-500 cursor-pointer focus:ring-2 focus:ring-cyan-400 transition"
+            >
+              <option>Default Narrator</option>
+              <option>Galactic Explorer</option>
+              <option>Swashbuckling Pirate</option>
+              <option>Medieval Bard</option>
+              <option>AI Overlord</option>
+              <option>Fantasy Wizard</option>
+              <option>Stand-Up Comedian</option>
+            </select>
+          </div>
+
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -146,7 +164,6 @@ export default function App() {
             </label>
           </div>
 
-          {/* Launch button → hides after done */}
           {!(!loading && launched) && (
             <div className="flex justify-center mb-6">
               <button
@@ -160,49 +177,44 @@ export default function App() {
                   </>
                 ) : (
                   <>
-                    Launch Story{" "}
-                      <i class="ri-arrow-right-long-fill"></i>
+                    Launch Story <i className="ri-arrow-right-long-fill"></i>
                   </>
                 )}
               </button>
             </div>
           )}
 
-    {(story || solution) && (
-      <div
-        ref={cardRef}
-        className="flex flex-col md:flex-row gap-6 mt-6"
-      >
-        {story && (
-          <div className="flex-1 bg-gray-900/70 border border-cyan-400 rounded-xl p-4 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-400/40 transition h-[400px] flex flex-col">
-            <h2 className="text-xl font-bold mb-2 text-cyan-300 flex items-center gap-2">
-              <i className="ri-book-open-fill"></i> Story
-            </h2>
-            <div className="overflow-y-auto pr-2 custom-scroll flex-grow">
-              <ReactMarkdown>{story}</ReactMarkdown>
-            </div>
-          </div>
-        )}
+          {(story || solution) && (
+            <div ref={cardRef} className="flex flex-col md:flex-row gap-6 mt-6">
+              {story && (
+                <div className="flex-1 bg-gray-900/70 border border-cyan-400 rounded-xl p-4 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-400/40 transition h-[400px] flex flex-col">
+                  <h2 className="text-xl font-bold mb-2 text-cyan-300 flex items-center gap-2">
+                    <i className="ri-book-open-fill"></i> Story
+                  </h2>
+                  <div className="overflow-y-auto pr-2 custom-scroll flex-grow">
+                    <ReactMarkdown>{story}</ReactMarkdown>
+                  </div>
+                </div>
+              )}
 
-        {solution && (
-          <div className="flex-1 bg-gray-900/70 border border-violet-400 rounded-xl p-4 shadow-lg shadow-violet-500/20 hover:shadow-violet-400/40 transition h-[400px] flex flex-col">
-            <h2 className="text-xl font-bold mb-2 text-violet-300 flex items-center gap-2">
-              <i className="ri-checkbox-circle-fill"></i> Solution
-            </h2>
-            <div className="overflow-y-auto pr-2 custom-scroll flex-grow">
-              <ReactMarkdown>{solution}</ReactMarkdown>
+              {solution && (
+                <div className="flex-1 bg-gray-900/70 border border-violet-400 rounded-xl p-4 shadow-lg shadow-violet-500/20 hover:shadow-violet-400/40 transition h-[400px] flex flex-col">
+                  <h2 className="text-xl font-bold mb-2 text-violet-300 flex items-center gap-2">
+                    <i className="ri-checkbox-circle-fill"></i> Solution
+                  </h2>
+                  <div className="overflow-y-auto pr-2 custom-scroll flex-grow">
+                    <ReactMarkdown>{solution}</ReactMarkdown>
+                  </div>
+                  <button
+                    onClick={handleCopySolution}
+                    className="mt-3 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 active:scale-95 transition flex items-center gap-2"
+                  >
+                    <i className="ri-clipboard-fill"></i> Copy Solution
+                  </button>
+                </div>
+              )}
             </div>
-            <button
-              onClick={handleCopySolution}
-              className="mt-3 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 active:scale-95 transition flex items-center gap-2"
-            >
-              <i className="ri-clipboard-fill"></i> Copy Solution
-            </button>
-          </div>
-        )}
-      </div>
-    )}
-
+          )}
 
           {story && solution && (
             <div className="flex justify-center">
@@ -217,7 +229,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="py-4 text-center text-gray-400 text-sm relative z-10">
         Made with <i className="ri-heart-fill text-red-400"></i> by{" "}
         <a
